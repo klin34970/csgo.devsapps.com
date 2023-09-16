@@ -1,0 +1,26 @@
+{
+	"authHost": "http://csgo-preprod.devsapps.com",
+	"authEndpoint": "/broadcasting/auth",
+	"clients": [
+		{
+			"appId": "ccc7ad7c8af2033a",
+			"key": "f01d66a880eb07cac726c0e507f5f41a"
+		}
+	],
+	"database": "redis",
+	"databaseConfig": {
+      "redis" : {
+          "port": "6379",
+          "host": "localhost"
+        }
+	},
+	"devMode": true,
+	"host": "csgo-preprod.devsapps.com",
+	"port": "6001",
+	"protocol": "http",
+	"socketio": {},
+	"sslCertPath": "",
+	"sslKeyPath": "",
+	"sslCertChainPath": "",
+	"sslPassphrase": ""
+}

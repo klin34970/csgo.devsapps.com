@@ -1,0 +1,68 @@
+//Object
+JSONObject users = view_as<JSONObject>(response.Data);
+
+
+//List as array from data
+JSONArray data = view_as<JSONArray>(users.Get("data"));
+//How much array we have
+int numUser = data.Length;
+//Each array containt objects informations
+JSONObject user;
+char steamid[256];
+for (int i = 0; i < numUser; i++) {
+	user = view_as<JSONObject>(data.Get(i));
+	user.GetString("steamid", steamid, sizeof(steamid));
+	delete user;
+}
+delete data;
+
+
+public Action TimerCheckBans(Handle timer){
+    if(drapi_users){
+        ArrayList ArrayWebID = new ArrayList(ByteCountToCells(11));
+        ArrayList ArrayLanguage = new ArrayList(ByteCountToCells(3));
+        for(int i = 1 ; i <= MaxClients; i++){
+            Dynamic playersettings = Dynamic.GetPlayerSettings(i).GetDynamic("infos");
+            if(playersettings.IsValid){
+                char swebID[11];
+                playersettings.GetString("webID", swebID, sizeof(swebID));
+                ArrayWebID.PushString(swebID);
+
+                char slanguage[11];
+                playersettings.GetString("language", slanguage, sizeof(slanguage));
+                ArrayLanguage.PushString(slanguage);
+            }
+        }
+
+        int lenWebID = GetArrayListImplodeSize(ArrayWebID, 1, PLATFORM_MAX_PATH);
+        char[] itemWebIDString = new char[lenWebID];
+        ImplodeArrayListStrings(ArrayWebID, ",", itemWebIDString, lenWebID);
+
+        int lenLanguage = GetArrayListImplodeSize(ArrayLanguage, 1, PLATFORM_MAX_PATH);
+        char[] itemLanguageString = new char[lenLanguage];
+        ImplodeArrayListStrings(ArrayLanguage, ",", itemLanguageString, lenLanguage);
+
+        char url[1024];
+        Format(url, sizeof(url), "users/bans?ids=%s&lang=%s", itemWebIDString, itemLanguageString);
+        httpClient().Get(url, OnReceived);
+        PrintToServer("%s %s", TAG, url);
+    }
+}
+
+    public function bans(Request $request){
+        $ids = $request->get('ids');
+        $ids = explode(',', $ids);
+
+        //only numeric > 0
+        $ids = array_map(function($ids){
+            if(is_numeric($ids) && $ids > 0){
+                return filter_var($ids, FILTER_SANITIZE_NUMBER_INT);
+            }
+        }, $ids);
+
+        //clear array
+        $ids = array_filter($ids);
+        $users = User::whereIn('id', $ids)->get();
+        return UserResource::collection($users);
+
+    }
